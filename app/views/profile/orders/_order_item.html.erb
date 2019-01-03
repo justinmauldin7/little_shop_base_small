@@ -9,6 +9,6 @@
     <p>Quantity: <%= oitem.quantity %></p>
     <p>Subtotal: <%= number_to_currency(oitem.subtotal) %></p>
     <p>Fulfilled: <%= oitem.fulfilled ? 'Yes' : 'No' %></p>
-    <h5 class="item-rating-link"><%= link_to "Rate this Item", rating_path(oitem.item) %></h5>
+    <h5 class="item-rating-link"><%= link_to "Rate this Item", new_items_ratings_path(oitem.item) %></h5>
   </div>
 </div>
