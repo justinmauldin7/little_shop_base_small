@@ -88,6 +88,7 @@ RSpec.describe 'Profile Orders page', type: :feature do
           expect(page).to have_content("Subtotal: #{number_to_currency(@oi_1.price*@oi_1.quantity)}")
           expect(page).to have_content("Subtotal: #{number_to_currency(@oi_1.price*@oi_1.quantity)}")
           expect(page).to have_content("Fulfilled: No")
+          expect(page).to have_link("Rate this Item")
         end
         within "#oitem-#{@oi_2.id}" do
           expect(page).to have_content(@oi_2.item.name)
@@ -98,6 +99,7 @@ RSpec.describe 'Profile Orders page', type: :feature do
           expect(page).to have_content("Quantity: #{@oi_2.quantity}")
           expect(page).to have_content("Subtotal: #{number_to_currency(@oi_2.price*@oi_2.quantity)}")
           expect(page).to have_content("Fulfilled: Yes")
+          expect(page).to have_link("Rate this Item")
         end
         expect(page).to have_content("Item Count: #{@order.total_item_count}")
         expect(page).to have_content("Total Cost: #{number_to_currency(@order.total_cost)}")
