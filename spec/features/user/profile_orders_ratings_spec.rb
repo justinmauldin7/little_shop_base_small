@@ -24,6 +24,10 @@ describe 'as a registered user' do
       @oi_3 = create(:order_item, order: @order_2, item: @item_1, price: 1, quantity: 3, created_at: yesterday, updated_at: yesterday)
       @oi_4 = create(:fulfilled_order_item, order: @order_2, item: @item_2, price: 2, quantity: 5, created_at: yesterday, updated_at: 2.hours.ago)
 
+      @rating_1 = Rating.create(item_id: @item_1, title: "Terrible Product", description: "Worst thing I ever bought!", score: 1, active: true)
+      @rating_inactive = Rating.create(item_id: @item_1, title: "Terrible Product", description: "Worst thing I ever bought!", score: 1, active: false)
+      @rating_invalid = Rating.create(item_id: @item_1, title: "Terrible Product", description: "Worst thing I ever bought!", score: 7, active: true)
+
       allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(@user)
     end
 
@@ -35,6 +39,17 @@ describe 'as a registered user' do
       end
 
       expect(current_path).to eq(new_items_ratings_path)
+
+      fill_in :rating_title, with: @rating_1.title
+      fill_in :rating_description, with: @rating_1.description
+      fill_in :rating_score, with: @rating_1.score
+
+      click_on "Create Rating"
+
+      expect(current_path).to eq(profile_order_path(@order_1))
+      expect(page).to have_content("Title: #{@rating_1.title}")
+      expect(page).to have_content("Description: #{@rating_1.description}")
+      expect(page).to have_content("Rating: #{@rating_1.score}")
     end
   end
 end
