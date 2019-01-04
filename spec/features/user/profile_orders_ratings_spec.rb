@@ -38,7 +38,7 @@ describe 'as a registered user' do
         click_on "Rate this Item"
       end
 
-      expect(current_path).to eq(new_items_ratings_path)
+      expect(current_path).to eq(new_items_ratings_path(@item_1))
 
       fill_in :rating_title, with: @rating_1.title
       fill_in :rating_description, with: @rating_1.description
