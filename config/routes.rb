@@ -34,7 +34,10 @@ Rails.application.routes.draw do
 
   get '/profile/edit', to: 'users#edit'
   namespace :profile do
-    resources :orders, only: [:index, :create, :show, :destroy]
+    resources :orders, only: [:index, :create, :show, :destroy] do
+      get '/order_item/:order_item_id/rating/new', to: 'ratings#new', as: 'new_order_item_rating'
+      post '/order_item/:order_item_id/rating', to: 'ratings#create', as: 'order_item_ratings'
+    end
   end
 
   post '/admin/users/:merchant_id/items', to: 'dashboard/items#create', as: 'admin_user_items'
