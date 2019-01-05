@@ -14,15 +14,15 @@ describe 'as a registered user' do
       @item_1 = create(:item, user: @merchant_1)
       @item_2 = create(:item, user: @merchant_2)
 
-      yesterday = 1.day.ago
+      @yesterday = 1.day.ago
 
-      @order_1 = create(:order, status: "completed", user: @user, created_at: yesterday)
-      @oi_1 = create(:order_item, order: @order_1, item: @item_1, price: 1, quantity: 3, created_at: yesterday, updated_at: yesterday)
-      @oi_2 = create(:fulfilled_order_item, order: @order_1, item: @item_2, price: 2, quantity: 5, created_at: yesterday, updated_at: 2.hours.ago)
+      @order_1 = create(:completed_order, user: @user, created_at: @yesterday)
+      @oi_1 = create(:fulfilled_order_item, order: @order_1, item: @item_1, price: 1, quantity: 3, created_at: @yesterday, updated_at: @yesterday)
+      @oi_2 = create(:fulfilled_order_item, order: @order_1, item: @item_2, price: 2, quantity: 5, created_at: @yesterday, updated_at: 2.hours.ago)
 
-      @order_2 = create(:order, status: "pending", user: @user, created_at: yesterday)
-      @oi_3 = create(:order_item, order: @order_2, item: @item_1, price: 1, quantity: 3, created_at: yesterday, updated_at: yesterday)
-      @oi_4 = create(:fulfilled_order_item, order: @order_2, item: @item_2, price: 2, quantity: 5, created_at: yesterday, updated_at: 2.hours.ago)
+      @order_2 = create(:order, user: @user, created_at: @yesterday)
+      @oi_3 = create(:order_item, order: @order_2, item: @item_1, price: 1, quantity: 3, created_at: @yesterday, updated_at: @yesterday)
+      @oi_4 = create(:fulfilled_order_item, order: @order_2, item: @item_2, price: 2, quantity: 5, created_at: @yesterday, updated_at: 2.hours.ago)
 
       @rating_1 = Rating.create(item_id: @item_1, title: "Terrible Product", description: "Worst thing I ever bought!", score: 1, active: true)
       @rating_inactive = Rating.create(item_id: @item_1, title: "Terrible Product", description: "Worst thing I ever bought!", score: 1, active: false)
@@ -38,7 +38,7 @@ describe 'as a registered user' do
         click_on "Rate this Item"
       end
 
-      expect(current_path).to eq(new_items_ratings_path(@item_1))
+      expect(current_path).to eq(new_item_ratings_path(@item_1))
 
       fill_in :rating_title, with: @rating_1.title
       fill_in :rating_description, with: @rating_1.description
