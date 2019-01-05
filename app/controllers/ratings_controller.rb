@@ -4,4 +4,8 @@ class RatingsController < ApplicationController
     @rating = Rating.new
   end
 
+  def create
+    @rating = Rating.create(user: current_user)
+  end
+
 end
