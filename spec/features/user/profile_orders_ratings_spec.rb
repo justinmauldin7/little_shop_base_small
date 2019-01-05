@@ -24,7 +24,7 @@ describe 'as a registered user' do
       @oi_3 = create(:order_item, order: @order_2, item: @item_1, price: 1, quantity: 3, created_at: @yesterday, updated_at: @yesterday)
       @oi_4 = create(:fulfilled_order_item, order: @order_2, item: @item_2, price: 2, quantity: 5, created_at: @yesterday, updated_at: 2.hours.ago)
 
-      @rating_1 = Rating.create(item_id: @item_1, title: "Terrible Product", description: "Worst thing I ever bought!", score: 1, active: true)
+      @rating_1 = Rating.create(item_id: @item_1, user: @user, title: "Terrible Product", description: "Worst thing I ever bought!", score: 1, active: true)
       @rating_inactive = Rating.create(item_id: @item_1, title: "Terrible Product", description: "Worst thing I ever bought!", score: 1, active: false)
       @rating_invalid = Rating.create(item_id: @item_1, title: "Terrible Product", description: "Worst thing I ever bought!", score: 7, active: true)
 
@@ -38,7 +38,7 @@ describe 'as a registered user' do
         click_on "Rate this Item"
       end
 
-      expect(current_path).to eq(new_item_ratings_path(@item_1))
+      expect(current_path).to eq(profile_order_new_order_item_rating_path(@order_1, @oi_1))
 
       fill_in :rating_title, with: @rating_1.title
       fill_in :rating_description, with: @rating_1.description
