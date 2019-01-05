@@ -1,10 +1,8 @@
 Rails.application.routes.draw do
   root to: 'welcome#index'
 
-  resources :items, only: [:index, :show]
-
-  namespace :items do
-    resource :ratings, only: [:new]
+  resources :items, only: [:index, :show] do
+    resource :ratings, only: [:new, :create]
   end
 
   resources :merchants, only: [:index]
