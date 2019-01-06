@@ -67,11 +67,11 @@ describe 'as a registered user' do
                                 title: "Great Product",
                                 description: "Best thing I ever bought!",
                                 score: 5, active: true)
-      @rating_inactive = Rating.create(item_id: @item_1,
+      @rating_inactive = Rating.create(item_id: @item_1, user: @user,
                                        title: "Terrible Product",
                                        description: "Worst thing I ever bought!",
                                        score: 1, active: false)
-      @rating_invalid = Rating.create(item_id: @item_1,
+      @rating_invalid = Rating.create(item_id: @item_1, user: @user,
                                       title: "Terrible Product",
                                       description: "Worst thing I ever bought!",
                                       score: 7, active: true)
@@ -146,9 +146,37 @@ describe 'as a registered user' do
         expect(page).to_not have_content("Rating Score: #{@rating_2.score}")
       end
     end
+
+    it 'only allows a score of 1-5 when creating rating' do
+      visit profile_order_path(@order_1)
+
+      within "#oitem-#{@oi_1.id}" do
+        click_on "Rate this Item"
+      end
+
+      expect(current_path).to eq(profile_order_new_order_item_rating_path(@order_1, @oi_1))
+
+      fill_in :rating_title, with: @rating_invalid.title
+      fill_in :rating_description, with: @rating_invalid.description
+      fill_in :rating_score, with: @rating_invalid.score
+
+      click_on "Create Rating"
+
+      expect(current_path).to eq(profile_order_order_item_ratings_path(@order_1, @oi_1))
+
+      expect(page).to have_content("Your rating has not been created.")
+      expect(@oi_1.item.ratings.count).to eq(0)
+      #
+      # within "#oitem-#{@oi_1.id}" do
+      #   expect(page).to have_link("Rate this Item")
+      #   expect(page).to_not have_content("Item Rating:")
+      #   expect(page).to_not have_content("Rating Title: #{@rating_invalid.title}")
+      #   expect(page).to_not have_content("Rating Description: #{@rating_invalid.description}")
+      #   expect(page).to_not have_content("Rating Score: #{@rating_invalid.score}")
+      # end
+    end
   end
 end
-
 
 
 
