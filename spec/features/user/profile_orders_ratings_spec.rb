@@ -194,6 +194,32 @@ describe 'as a registered user' do
       expect(page).to have_content("Your rating has not been created.")
       expect(@oi_3.item.ratings.count).to eq(0)
     end
+
+    it 'can disable a review for an item' do
+      visit profile_order_path(@order_1)
+
+      within "#oitem-#{@oi_1.id}" do
+        click_on "Rate this Item"
+      end
+
+      fill_in :rating_title, with: @rating_1.title
+      fill_in :rating_description, with: @rating_1.description
+      fill_in :rating_score, with: @rating_1.score
+
+      click_on "Create Rating"
+      within "#oitem-#{@oi_1.id}" do
+        expect(page).to have_button("Disable Your Review")
+        click_button "Disable Your Review"
+      end
+
+      expect(current_path).to eq(profile_order_path(@corder_1))
+      expect(page).to have_content("Your Review Has Been Disabled.")
+      expect(@oi_3.item.ratings.active).to eq(false)
+
+      within "#oitem-#{@oi_1.id}" do
+        expect(page).to_not have_button("Disable Your Review")
+      end
+    end
   end
 end
 
