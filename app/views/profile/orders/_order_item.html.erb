@@ -20,6 +20,7 @@
         <p>Rating Title: <%= oitem.item.ratings[0].title %></p>
         <p>Rating Description: <%= oitem.item.ratings[0].description %></p>
         <p>Rating Score: <%= oitem.item.ratings[0].score %></p>
+        <h5><%= button_to "Disable Your Review", profile_order_disable_rating_path(@order, oitem), method: :patch %></h5>
       </div>
     <% end %>
   </div>
