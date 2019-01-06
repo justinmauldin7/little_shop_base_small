@@ -14,7 +14,7 @@
       <h5 class="item-rating-link"><%= link_to "Rate this Item", profile_order_new_order_item_rating_path(@order, oitem) %></h5>
     <%end %>
 
-    <% if oitem.item.ratings.count == 1 %>
+    <% if oitem.item.ratings.count >= 1 %>
       <div class='item_rating'>
         <h2>Item Rating:</h2>
         <p>Rating Title: <%= oitem.item.ratings[0].title %></p>

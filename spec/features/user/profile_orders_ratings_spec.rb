@@ -2,6 +2,34 @@ require 'rails_helper'
 
 include ActionView::Helpers::NumberHelper
 
+describe 'as a visitor' do
+  describe 'on the profile orders page' do
+    it 'can create a new rating for an item' do
+      user = create(:user)
+      merchant_1 = create(:merchant)
+      item_1 = create(:item, user: merchant_1)
+      yesterday = 1.day.ago
+      order_1 = create(:completed_order, user: user, created_at: yesterday)
+      oi_1 = create(:fulfilled_order_item, order: order_1, item: item_1,
+                    price: 1, quantity: 3, created_at: yesterday,
+                    updated_at: yesterday)
+      rating_1 = Rating.create(item_id: item_1, user: user,
+                                title: "Terrible Product",
+                                description: "Worst thing I ever bought!",
+                                score: 1, active: true)
+
+      visit profile_order_path(order_1)
+
+      within "#oitem-#{oi_1.id}" do
+        click_on "Rate this Item"
+      end
+
+      expect(page.status_code).to eq(404)
+      end
+
+  end
+end
+
 describe 'as a registered user' do
   describe 'on the profile orders page' do
     before :each do
@@ -17,16 +45,36 @@ describe 'as a registered user' do
       @yesterday = 1.day.ago
 
       @order_1 = create(:completed_order, user: @user, created_at: @yesterday)
-      @oi_1 = create(:fulfilled_order_item, order: @order_1, item: @item_1, price: 1, quantity: 3, created_at: @yesterday, updated_at: @yesterday)
-      @oi_2 = create(:fulfilled_order_item, order: @order_1, item: @item_2, price: 2, quantity: 5, created_at: @yesterday, updated_at: 2.hours.ago)
+      @oi_1 = create(:fulfilled_order_item, order: @order_1, item: @item_1,
+                      price: 1, quantity: 3, created_at: @yesterday,
+                      updated_at: @yesterday)
+      @oi_2 = create(:fulfilled_order_item, order: @order_1, item: @item_2,
+                     price: 2, quantity: 5, created_at: @yesterday,
+                     updated_at: 2.hours.ago)
 
       @order_2 = create(:order, user: @user, created_at: @yesterday)
-      @oi_3 = create(:order_item, order: @order_2, item: @item_1, price: 1, quantity: 3, created_at: @yesterday, updated_at: @yesterday)
-      @oi_4 = create(:fulfilled_order_item, order: @order_2, item: @item_2, price: 2, quantity: 5, created_at: @yesterday, updated_at: 2.hours.ago)
+      @oi_3 = create(:order_item, order: @order_2, item: @item_1, price: 1,
+                     quantity: 3, created_at: @yesterday, updated_at: @yesterday)
+      @oi_4 = create(:fulfilled_order_item, order: @order_2, item: @item_2,
+                     price: 2, quantity: 5, created_at: @yesterday,
+                     updated_at: 2.hours.ago)
 
-      @rating_1 = Rating.create(item_id: @item_1, user: @user, title: "Terrible Product", description: "Worst thing I ever bought!", score: 1, active: true)
-      @rating_inactive = Rating.create(item_id: @item_1, title: "Terrible Product", description: "Worst thing I ever bought!", score: 1, active: false)
-      @rating_invalid = Rating.create(item_id: @item_1, title: "Terrible Product", description: "Worst thing I ever bought!", score: 7, active: true)
+      @rating_1 = Rating.create(item_id: @item_1, user: @user,
+                                title: "Terrible Product",
+                                description: "Worst thing I ever bought!",
+                                score: 1, active: true)
+      @rating_2 = Rating.create(item_id: @item_1, user: @user,
+                                title: "Great Product",
+                                description: "Best thing I ever bought!",
+                                score: 5, active: true)
+      @rating_inactive = Rating.create(item_id: @item_1,
+                                       title: "Terrible Product",
+                                       description: "Worst thing I ever bought!",
+                                       score: 1, active: false)
+      @rating_invalid = Rating.create(item_id: @item_1,
+                                      title: "Terrible Product",
+                                      description: "Worst thing I ever bought!",
+                                      score: 7, active: true)
 
       allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(@user)
     end
@@ -54,6 +102,48 @@ describe 'as a registered user' do
         expect(page).to have_content("Rating Title: #{@rating_1.title}")
         expect(page).to have_content("Rating Description: #{@rating_1.description}")
         expect(page).to have_content("Rating Score: #{@rating_1.score}")
+      end
+    end
+
+    it 'cannot create a second rating for an item' do
+      visit profile_order_path(@order_1)
+
+      within "#oitem-#{@oi_1.id}" do
+        click_on "Rate this Item"
+      end
+
+      fill_in :rating_title, with: @rating_1.title
+      fill_in :rating_description, with: @rating_1.description
+      fill_in :rating_score, with: @rating_1.score
+
+      click_on "Create Rating"
+
+      visit profile_order_new_order_item_rating_path(@order_1, @oi_1)
+
+      expect(current_path).to eq(profile_order_new_order_item_rating_path(@order_1, @oi_1))
+
+      fill_in :rating_title, with: @rating_2.title
+      fill_in :rating_description, with: @rating_2.description
+      fill_in :rating_score, with: @rating_2.score
+
+      click_on "Create Rating"
+
+      expect(current_path).to eq(profile_order_path(@order_1))
+
+      expect(page).to have_content("You have already rated this item.")
+
+      within "#oitem-#{@oi_1.id}" do
+        expect(@oi_1.item.ratings.count).to eq(1)
+
+        expect(page).to_not have_link("Rate this Item")
+        expect(page).to have_content("Item Rating:")
+        expect(page).to have_content("Rating Title: #{@rating_1.title}")
+        expect(page).to have_content("Rating Description: #{@rating_1.description}")
+        expect(page).to have_content("Rating Score: #{@rating_1.score}")
+
+        expect(page).to_not have_content("Rating Title: #{@rating_2.title}")
+        expect(page).to_not have_content("Rating Description: #{@rating_2.description}")
+        expect(page).to_not have_content("Rating Score: #{@rating_2.score}")
       end
     end
   end
