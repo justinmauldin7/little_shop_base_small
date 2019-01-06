@@ -47,9 +47,14 @@ describe 'as a registered user' do
       click_on "Create Rating"
 
       expect(current_path).to eq(profile_order_path(@order_1))
-      expect(page).to have_content("Title: #{@rating_1.title}")
-      expect(page).to have_content("Description: #{@rating_1.description}")
-      expect(page).to have_content("Rating: #{@rating_1.score}")
+
+      within "#oitem-#{@oi_1.id}" do
+        expect(page).to_not have_link("Rate this Item")
+        expect(page).to have_content("Item Rating:")
+        expect(page).to have_content("Rating Title: #{@rating_1.title}")
+        expect(page).to have_content("Rating Description: #{@rating_1.description}")
+        expect(page).to have_content("Rating Score: #{@rating_1.score}")
+      end
     end
   end
 end
