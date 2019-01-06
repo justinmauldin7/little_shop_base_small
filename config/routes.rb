@@ -1,10 +1,8 @@
 Rails.application.routes.draw do
   root to: 'welcome#index'
 
-  resources :items, only: [:index, :show]
-
-  namespace :items do
-    resource :ratings, only: [:new]
+  resources :items, only: [:index, :show] do
+    resource :ratings, only: [:new, :create]
   end
 
   resources :merchants, only: [:index]
@@ -36,7 +34,10 @@ Rails.application.routes.draw do
 
   get '/profile/edit', to: 'users#edit'
   namespace :profile do
-    resources :orders, only: [:index, :create, :show, :destroy]
+    resources :orders, only: [:index, :create, :show, :destroy] do
+      get '/order_item/:order_item_id/rating/new', to: 'ratings#new', as: 'new_order_item_rating'
+      post '/order_item/:order_item_id/rating', to: 'ratings#create', as: 'order_item_ratings'
+    end
   end
 
   post '/admin/users/:merchant_id/items', to: 'dashboard/items#create', as: 'admin_user_items'
