@@ -37,6 +37,7 @@ Rails.application.routes.draw do
     resources :orders, only: [:index, :create, :show, :destroy] do
       get '/order_item/:order_item_id/rating/new', to: 'ratings#new', as: 'new_order_item_rating'
       post '/order_item/:order_item_id/rating', to: 'ratings#create', as: 'order_item_ratings'
+      patch '/order_item/:order_item_id/rating/disable', to: 'ratings#disable', as: 'disable_rating'
     end
   end
 

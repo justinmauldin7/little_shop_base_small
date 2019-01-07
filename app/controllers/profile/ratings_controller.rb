@@ -9,9 +9,10 @@ class Profile::RatingsController < ApplicationController
   end
 
   def create
+    @order = Order.find(params[:order_id])
     @item = OrderItem.find(params[:order_item_id]).item
 
-    if @item.ratings.count < 1 || @item.ratings.count == nil
+    if @item.ratings.count < 1 && @order.status != "cancelled"
       @rating = Rating.create(item: @item,
                             user: current_user,
                             title: rating_params[:title],
@@ -30,13 +31,25 @@ class Profile::RatingsController < ApplicationController
         render :new
       end
     else
-      flash[:error] = "You have already rated this item."
+      if @item.ratings.count == 1
+        flash[:error] = "You have already rated this item."
+      else
+        flash[:error] = "Your rating has not been created."
+      end
       redirect_to profile_order_path(params[:order_id])
     end
   end
 
-  private
+  def disable
+    @rating = OrderItem.find(params[:order_item_id]).item.ratings[0]
+    @rating.disable
+    @rating.save
 
+    flash[:success] = "Your Rating Has Been Disabled."
+    redirect_to profile_order_path(params[:order_id])
+  end
+
+  private
   def rating_params
     params.require(:rating).permit(:title, :description, :score)
   end

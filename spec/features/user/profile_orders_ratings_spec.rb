@@ -4,7 +4,7 @@ include ActionView::Helpers::NumberHelper
 
 describe 'as a visitor' do
   describe 'on the profile orders page' do
-    it 'can create a new rating for an item' do
+    it 'cannot create a new rating for an item' do
       user = create(:user)
       merchant_1 = create(:merchant)
       item_1 = create(:item, user: merchant_1)
@@ -52,10 +52,10 @@ describe 'as a registered user' do
                      price: 2, quantity: 5, created_at: @yesterday,
                      updated_at: 2.hours.ago)
 
-      @order_2 = create(:order, user: @user, created_at: @yesterday)
-      @oi_3 = create(:order_item, order: @order_2, item: @item_1, price: 1,
+      @cancelled_order = create(:cancelled_order, user: @user, created_at: @yesterday)
+      @oi_3 = create(:order_item, order: @cancelled_order, item: @item_1, price: 1,
                      quantity: 3, created_at: @yesterday, updated_at: @yesterday)
-      @oi_4 = create(:fulfilled_order_item, order: @order_2, item: @item_2,
+      @oi_4 = create(:fulfilled_order_item, order: @cancelled_order, item: @item_2,
                      price: 2, quantity: 5, created_at: @yesterday,
                      updated_at: 2.hours.ago)
 
@@ -166,14 +166,60 @@ describe 'as a registered user' do
 
       expect(page).to have_content("Your rating has not been created.")
       expect(@oi_1.item.ratings.count).to eq(0)
-      #
-      # within "#oitem-#{@oi_1.id}" do
-      #   expect(page).to have_link("Rate this Item")
-      #   expect(page).to_not have_content("Item Rating:")
-      #   expect(page).to_not have_content("Rating Title: #{@rating_invalid.title}")
-      #   expect(page).to_not have_content("Rating Description: #{@rating_invalid.description}")
-      #   expect(page).to_not have_content("Rating Score: #{@rating_invalid.score}")
-      # end
+    end
+
+    it 'cannot leave review for canceled order' do
+      visit profile_order_path(@cancelled_order)
+
+      within "#oitem-#{@oi_3.id}" do
+        expect(page).to_not have_link("Rate this Item")
+      end
+
+      within "#oitem-#{@oi_4.id}" do
+        expect(page).to_not have_link("Rate this Item")
+      end
+
+      visit profile_order_new_order_item_rating_path(@cancelled_order, @oi_3)
+
+      expect(current_path).to eq(profile_order_new_order_item_rating_path(@cancelled_order, @oi_3))
+
+      fill_in :rating_title, with: @rating_1.title
+      fill_in :rating_description, with: @rating_1.description
+      fill_in :rating_score, with: @rating_1.score
+
+      click_on "Create Rating"
+
+      expect(current_path).to eq(profile_order_path(@cancelled_order))
+
+      expect(page).to have_content("Your rating has not been created.")
+      expect(@oi_3.item.ratings.count).to eq(0)
+    end
+
+    it 'can disable a review for an item' do
+      visit profile_order_path(@order_1)
+
+      within "#oitem-#{@oi_1.id}" do
+        click_on "Rate this Item"
+      end
+
+      fill_in :rating_title, with: @rating_1.title
+      fill_in :rating_description, with: @rating_1.description
+      fill_in :rating_score, with: @rating_1.score
+
+      click_on "Create Rating"
+
+      within "#oitem-#{@oi_1.id}" do
+        expect(page).to have_button("Disable Your Rating")
+        click_button "Disable Your Rating"
+      end
+
+      expect(current_path).to eq(profile_order_path(@order_1.reload))
+      expect(page).to have_content("Your Rating Has Been Disabled.")
+      expect(@oi_1.reload.item.ratings[0].active).to eq(false)
+
+      within "#oitem-#{@oi_1.id}" do
+        expect(page).to_not have_button("Disable Your Rating")
+      end
     end
   end
 end
