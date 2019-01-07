@@ -207,17 +207,18 @@ describe 'as a registered user' do
       fill_in :rating_score, with: @rating_1.score
 
       click_on "Create Rating"
+
       within "#oitem-#{@oi_1.id}" do
-        expect(page).to have_button("Disable Your Review")
-        click_button "Disable Your Review"
+        expect(page).to have_button("Disable Your Rating")
+        click_button "Disable Your Rating"
       end
 
-      expect(current_path).to eq(profile_order_path(@corder_1))
-      expect(page).to have_content("Your Review Has Been Disabled.")
-      expect(@oi_3.item.ratings.active).to eq(false)
+      expect(current_path).to eq(profile_order_path(@order_1.reload))
+      expect(page).to have_content("Your Rating Has Been Disabled.")
+      expect(@oi_1.reload.item.ratings[0].active).to eq(false)
 
       within "#oitem-#{@oi_1.id}" do
-        expect(page).to_not have_button("Disable Your Review")
+        expect(page).to_not have_button("Disable Your Rating")
       end
     end
   end
