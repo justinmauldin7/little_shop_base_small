@@ -40,8 +40,16 @@ class Profile::RatingsController < ApplicationController
     end
   end
 
-  private
+  def disable
+    @rating = OrderItem.find(params[:order_item_id]).item.ratings[0]
+    @rating.disable
+    @rating.save
 
+    flash[:success] = "Your Rating Has Been Disabled."
+    redirect_to profile_order_path(params[:order_id])
+  end
+
+  private
   def rating_params
     params.require(:rating).permit(:title, :description, :score)
   end
