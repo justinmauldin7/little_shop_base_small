@@ -4,7 +4,7 @@ include ActionView::Helpers::NumberHelper
 
 describe 'as a visitor' do
   describe 'on the profile orders page' do
-    it 'can create a new rating for an item' do
+    it 'cannot create a new rating for an item' do
       user = create(:user)
       merchant_1 = create(:merchant)
       item_1 = create(:item, user: merchant_1)
