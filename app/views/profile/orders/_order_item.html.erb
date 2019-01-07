@@ -14,13 +14,13 @@
       <h5 class="item-rating-link"><%= link_to "Rate this Item", profile_order_new_order_item_rating_path(@order, oitem) %></h5>
     <%end %>
 
-    <% if oitem.item.ratings.count >= 1 %>
+    <% if oitem.item.ratings.count >= 1 && oitem.item.ratings[0].active == true %>
       <div class='item_rating'>
         <h2>Item Rating:</h2>
         <p>Rating Title: <%= oitem.item.ratings[0].title %></p>
         <p>Rating Description: <%= oitem.item.ratings[0].description %></p>
         <p>Rating Score: <%= oitem.item.ratings[0].score %></p>
-        <h5><%= button_to "Disable Your Review", profile_order_disable_rating_path(@order, oitem), method: :patch %></h5>
+        <h5><%= button_to "Disable Your Rating", profile_order_disable_rating_path(@order, oitem), method: :patch %></h5>
       </div>
     <% end %>
   </div>
