@@ -8,4 +8,8 @@ class Rating < ApplicationRecord
     greater_than_or_equal_to: 1,
     less_than_or_equal_to: 5
   }
+
+  def disable
+    update_column(:active, false)
+  end
 end
