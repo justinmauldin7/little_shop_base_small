@@ -11,6 +11,26 @@ class User < ApplicationRecord
 
   enum role: [:default, :merchant, :admin]
 
+  def self.top_merchants_sold_most_items_this_month(count)
+    this_months_items = OrderItem.oi_this_month
+    User.joins(items: :order_items)
+      .select('users.*, sum(order_items.quantity) as total_items')
+      .where('order_items.id IN (?)', this_months_items)
+      .order('total_items desc')
+      .group(:id)
+      .limit(count)
+  end
+
+  def self.top_merchants_sold_most_items_last_month(count)
+    last_months_items = OrderItem.oi_last_month
+    User.joins(items: :order_items)
+      .select('users.*, sum(order_items.quantity) as total_items')
+      .where('order_items.id IN (?)', last_months_items)
+      .order('total_items desc')
+      .group(:id)
+      .limit(count)
+  end
+
   def self.top_3_revenue_merchants
     User.joins(items: :order_items)
       .select('users.*, sum(order_items.quantity * order_items.price) as revenue')
