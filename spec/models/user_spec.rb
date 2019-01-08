@@ -32,24 +32,36 @@ RSpec.describe User, type: :model do
         @item_3 = create(:item, user: @merchant_3)
 
         @order_1 = create(:completed_order, user: @user_1)
-        @oi_1 = create(:fulfilled_order_item, item: @item_1, order: @order_1, quantity: 100, price: 100, created_at: 10.minutes.ago, updated_at: 9.minute.ago)
+        @oi_1 = create(:fulfilled_order_item, item: @item_1, order: @order_1, quantity: 100, price: 100, created_at: 10.minutes.ago, updated_at: 9.minutes.ago)
 
         @order_2 = create(:completed_order, user: @user_2)
-        @oi_2 = create(:fulfilled_order_item, item: @item_2, order: @order_2, quantity: 300, price: 300, created_at: 2.days.ago, updated_at: 1.minute.ago)
+        @oi_2 = create(:fulfilled_order_item, item: @item_2, order: @order_2, quantity: 300, price: 300, created_at: 2.days.ago, updated_at: 1.minutes.ago)
 
         @order_3 = create(:completed_order, user: @user_3)
-        @oi_3 = create(:fulfilled_order_item, item: @item_3, order: @order_3, quantity: 200, price: 200, created_at: 10.minutes.ago, updated_at: 5.minute.ago)
+        @oi_3 = create(:fulfilled_order_item, item: @item_3, order: @order_3, quantity: 200, price: 200, created_at: 10.minutes.ago, updated_at: 5.minutes.ago)
 
         @order_4 = create(:completed_order, user: @user_4)
-        @oi_4 = create(:fulfilled_order_item, item: @item_3, order: @order_4, quantity: 201, price: 200, created_at: 10.minutes.ago, updated_at: 5.minute.ago)
+        @oi_4 = create(:fulfilled_order_item, item: @item_3, order: @order_4, quantity: 201, price: 200, created_at: 10.minutes.ago, updated_at: 5.minutes.ago)
+
+        @order_5 = create(:completed_order, user: @user_1)
+        @oi_5 = create(:fulfilled_order_item, item: @item_1, order: @order_5, quantity: 100, price: 100, created_at: 34.days.ago, updated_at: 32.days.ago)
+
+        @order_6 = create(:completed_order, user: @user_2)
+        @oi_6 = create(:fulfilled_order_item, item: @item_2, order: @order_6, quantity: 600, price: 300, created_at: 34.days.ago, updated_at: 32.days.ago)
+
+        @order_7 = create(:completed_order, user: @user_3)
+        @oi_7 = create(:fulfilled_order_item, item: @item_3, order: @order_7, quantity: 200, price: 200, created_at: 34.days.ago, updated_at: 32.days.ago)
+
+        @order_8 = create(:completed_order, user: @user_4)
+        @oi_8 = create(:fulfilled_order_item, item: @item_3, order: @order_8, quantity: 201, price: 200, created_at: 34.days.ago, updated_at: 32.days.ago)
       end
       it '.top_3_revenue_merchants' do
         expect(User.top_3_revenue_merchants[0]).to eq(@merchant_2)
-        expect(User.top_3_revenue_merchants[0].revenue.to_f).to eq(90000.00)
+        expect(User.top_3_revenue_merchants[0].revenue.to_f).to eq(270000.00)
         expect(User.top_3_revenue_merchants[1]).to eq(@merchant_3)
-        expect(User.top_3_revenue_merchants[1].revenue.to_f).to eq(80200.00)
+        expect(User.top_3_revenue_merchants[1].revenue.to_f).to eq(160400.0)
         expect(User.top_3_revenue_merchants[2]).to eq(@merchant_1)
-        expect(User.top_3_revenue_merchants[2].revenue.to_f).to eq(10000.00)
+        expect(User.top_3_revenue_merchants[2].revenue.to_f).to eq(20000.00)
       end
       it '.merchant_fulfillment_times' do
         expect(User.merchant_fulfillment_times(:asc, 1)).to eq([@merchant_1])
@@ -58,24 +70,61 @@ RSpec.describe User, type: :model do
       it '.top_3_fulfilling_merchants' do
         expect(User.top_3_fulfilling_merchants[0]).to eq(@merchant_1)
         aft = User.top_3_fulfilling_merchants[0].avg_fulfillment_time
-        expect(aft[0..7]).to eq('00:01:00')
+        expect(aft[0..7]).to eq('1 day 00')
         expect(User.top_3_fulfilling_merchants[1]).to eq(@merchant_3)
         aft = User.top_3_fulfilling_merchants[1].avg_fulfillment_time
-        expect(aft[0..7]).to eq('00:05:00')
+        expect(aft[0..7]).to eq('1 day 00')
         expect(User.top_3_fulfilling_merchants[2]).to eq(@merchant_2)
         aft = User.top_3_fulfilling_merchants[2].avg_fulfillment_time
-        expect(aft[0..13]).to eq('1 day 23:59:00')
+        expect(aft[0..13]).to eq('1 day 23:59:30')
       end
       it '.bottom_3_fulfilling_merchants' do
         expect(User.bottom_3_fulfilling_merchants[0]).to eq(@merchant_2)
         aft = User.bottom_3_fulfilling_merchants[0].avg_fulfillment_time
-        expect(aft[0..13]).to eq('1 day 23:59:00')
+        expect(aft[0..13]).to eq('1 day 23:59:30')
         expect(User.bottom_3_fulfilling_merchants[1]).to eq(@merchant_3)
         aft = User.bottom_3_fulfilling_merchants[1].avg_fulfillment_time
-        expect(aft[0..7]).to eq('00:05:00')
+        expect(aft[0..7]).to eq('1 day 00')
         expect(User.bottom_3_fulfilling_merchants[2]).to eq(@merchant_1)
         aft = User.bottom_3_fulfilling_merchants[2].avg_fulfillment_time
-        expect(aft[0..7]).to eq('00:01:00')
+        expect(aft[0..7]).to eq('1 day 00')
+      end
+
+      # Merchants who sold the most items in a month:
+      #-order_item was fulfilled in that month, and the order status is completed.
+
+      #“Items”: -units sold, a sum of quantities within the merchant’s order_items.
+
+      #“Month” -calendar month
+
+      # Merchants who fulfilled non-cancelled orders:
+      #-merchants fulfilled their items AND the order status is not ‘cancelled’
+      #but pending/completed orders are fine
+
+      #filter out merchants who have un-fulfilled items in any order
+
+      it 'top 10 merchants who sold most items THIS month' do
+        expect(User.top_merchants_sold_most_items_this_month(3)[0]).to eq(@merchant_3)
+        expect(User.top_merchants_sold_most_items_this_month(3)[1]).to eq(@merchant_2)
+        expect(User.top_merchants_sold_most_items_this_month(3)[2]).to eq(@merchant_1)
+      end
+
+      it 'top 10 merchants who sold most items LAST month' do
+        expect(User.top_merchants_sold_most_items_last_month(3)[0]).to eq(@merchant_2)
+        expect(User.top_merchants_sold_most_items_last_month(3)[1]).to eq(@merchant_3)
+        expect(User.top_merchants_sold_most_items_last_month(3)[2]).to eq(@merchant_1)
+      end
+
+      xit 'top 10 merchants who fulfilled non-cancelled orders THIS month' do
+      end
+
+      xit 'top 10 merchants who fulfilled non-cancelled orders LAST month' do
+      end
+
+      xit 'top 5 merchants who fulfilled fastest to my state' do
+      end
+
+      xit 'top 5 merchants who fulfilled fastest to my city' do
       end
     end
   end

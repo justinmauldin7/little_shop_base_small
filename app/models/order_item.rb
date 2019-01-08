@@ -14,4 +14,22 @@ class OrderItem < ApplicationRecord
   def subtotal
     quantity * price
   end
+
+  def self.oi_this_month
+    fulfilled = self.all.where(fulfilled: true)
+    fulfilled.map do |oi|
+      if oi.updated_at.month == Time.now.month
+         oi.id
+      end
+    end.compact
+  end
+
+  def self.oi_last_month
+    fulfilled = self.all.where(fulfilled: true)
+    fulfilled.map do |oi|
+      if oi.updated_at.month == 1.months.ago.month
+         oi.id
+      end
+    end.compact
+  end
 end

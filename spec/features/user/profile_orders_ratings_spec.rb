@@ -52,6 +52,14 @@ describe 'as a registered user' do
                      price: 2, quantity: 5, created_at: @yesterday,
                      updated_at: 2.hours.ago)
 
+      @order_2 = create(:completed_order, user: @user, created_at: @yesterday)
+      @oi_5 = create(:fulfilled_order_item, order: @order_2, item: @item_1,
+                      price: 1, quantity: 3, created_at: @yesterday,
+                      updated_at: @yesterday)
+      @oi_6 = create(:fulfilled_order_item, order: @order_2, item: @item_2,
+                     price: 2, quantity: 5, created_at: @yesterday,
+                     updated_at: 2.hours.ago)
+
       @cancelled_order = create(:cancelled_order, user: @user, created_at: @yesterday)
       @oi_3 = create(:order_item, order: @cancelled_order, item: @item_1, price: 1,
                      quantity: 3, created_at: @yesterday, updated_at: @yesterday)
@@ -105,7 +113,7 @@ describe 'as a registered user' do
       end
     end
 
-    it 'cannot create a second rating for an item' do
+    it 'cannot create a second rating on the same order for an item' do
       visit profile_order_path(@order_1)
 
       within "#oitem-#{@oi_1.id}" do
@@ -219,6 +227,42 @@ describe 'as a registered user' do
 
       within "#oitem-#{@oi_1.id}" do
         expect(page).to_not have_button("Disable Your Rating")
+      end
+    end
+
+    xit 'can review item again, but in other orders' do
+      visit profile_order_path(@order_1)
+
+      within "#oitem-#{@oi_1.id}" do
+        click_on "Rate this Item"
+      end
+
+      fill_in :rating_title, with: @rating_1.title
+      fill_in :rating_description, with: @rating_1.description
+      fill_in :rating_score, with: @rating_1.score
+
+      click_on "Create Rating"
+
+      visit profile_order_path(@order_2)
+
+      within "#oitem-#{@oi_5.id}" do
+        click_on "Rate this Item"
+      end
+
+      fill_in :rating_title, with: @rating_2.title
+      fill_in :rating_description, with: @rating_2.description
+      fill_in :rating_score, with: @rating_2.score
+
+      click_on "Create Rating"
+
+      expect(current_path).to eq(profile_order_path(@order_2))
+
+      within "#oitem-#{@oi_5.id}" do
+        expect(page).to_not have_link("Rate this Item")
+        expect(page).to have_content("Item Rating:")
+        expect(page).to have_content("Rating Title: #{@rating_2.title}")
+        expect(page).to have_content("Rating Description: #{@rating_2.description}")
+        expect(page).to have_content("Rating Score: #{@rating_2.score}")
       end
     end
   end
