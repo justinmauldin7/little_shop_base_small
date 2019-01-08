@@ -31,6 +31,26 @@ class User < ApplicationRecord
       .limit(count)
   end
 
+  def self.top_merchants_with_non_cancelled_orders_this_month(count)
+    this_months_items = OrderItem.oi_this_month
+    User.joins(items: :orders)
+      .select('users.*, count(orders.id) as orders_total')
+      .where('order_items.id IN (?) AND orders.status != ?', this_months_items, 2)
+      .order('orders_total desc')
+      .group(:id)
+      .limit(count)
+  end
+
+  def self.top_merchants_with_non_cancelled_orders_last_month(count)
+    last_months_items = OrderItem.oi_last_month
+    User.joins(items: :orders)
+      .select('users.*, count(orders.id) as orders_total')
+      .where('order_items.id IN (?) AND orders.status != ?', last_months_items, 2)
+      .order('orders_total desc')
+      .group(:id)
+      .limit(count)
+  end
+
   def self.top_3_revenue_merchants
     User.joins(items: :order_items)
       .select('users.*, sum(order_items.quantity * order_items.price) as revenue')

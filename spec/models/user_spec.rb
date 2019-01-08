@@ -34,7 +34,7 @@ RSpec.describe User, type: :model do
         @order_1 = create(:completed_order, user: @user_1)
         @oi_1 = create(:fulfilled_order_item, item: @item_1, order: @order_1, quantity: 100, price: 100, created_at: 10.minutes.ago, updated_at: 9.minutes.ago)
 
-        @order_2 = create(:completed_order, user: @user_2)
+        @order_2 = create(:cancelled_order, user: @user_2)
         @oi_2 = create(:fulfilled_order_item, item: @item_2, order: @order_2, quantity: 300, price: 300, created_at: 2.days.ago, updated_at: 1.minutes.ago)
 
         @order_3 = create(:completed_order, user: @user_3)
@@ -43,7 +43,7 @@ RSpec.describe User, type: :model do
         @order_4 = create(:completed_order, user: @user_4)
         @oi_4 = create(:fulfilled_order_item, item: @item_3, order: @order_4, quantity: 201, price: 200, created_at: 10.minutes.ago, updated_at: 5.minutes.ago)
 
-        @order_5 = create(:completed_order, user: @user_1)
+        @order_5 = create(:cancelled_order, user: @user_1)
         @oi_5 = create(:fulfilled_order_item, item: @item_1, order: @order_5, quantity: 100, price: 100, created_at: 34.days.ago, updated_at: 32.days.ago)
 
         @order_6 = create(:completed_order, user: @user_2)
@@ -54,6 +54,33 @@ RSpec.describe User, type: :model do
 
         @order_8 = create(:completed_order, user: @user_4)
         @oi_8 = create(:fulfilled_order_item, item: @item_3, order: @order_8, quantity: 201, price: 200, created_at: 34.days.ago, updated_at: 32.days.ago)
+      end
+      it 'top 10 merchants who sold most items THIS month' do
+        expect(User.top_merchants_sold_most_items_this_month(3)[0]).to eq(@merchant_3)
+        expect(User.top_merchants_sold_most_items_this_month(3)[1]).to eq(@merchant_2)
+        expect(User.top_merchants_sold_most_items_this_month(3)[2]).to eq(@merchant_1)
+      end
+      it 'top 10 merchants who sold most items LAST month' do
+        expect(User.top_merchants_sold_most_items_last_month(3)[0]).to eq(@merchant_2)
+        expect(User.top_merchants_sold_most_items_last_month(3)[1]).to eq(@merchant_3)
+        expect(User.top_merchants_sold_most_items_last_month(3)[2]).to eq(@merchant_1)
+      end
+      it 'top 10 merchants who fulfilled non-cancelled orders THIS month' do
+        expect(User.top_merchants_with_non_cancelled_orders_this_month(3)[0]).to eq(@merchant_3)
+        expect(User.top_merchants_with_non_cancelled_orders_this_month(3)[1]).to eq(@merchant_1)
+
+      end
+      it 'top 10 merchants who fulfilled non-cancelled orders LAST month' do
+        expect(User.top_merchants_with_non_cancelled_orders_last_month(3)[0]).to eq(@merchant_3)
+        expect(User.top_merchants_with_non_cancelled_orders_last_month(3)[1]).to eq(@merchant_2)
+      end
+      xit 'top 5 merchants who fulfilled fastest to my state' do
+
+
+      end
+      xit 'top 5 merchants who fulfilled fastest to my city' do
+
+
       end
       it '.top_3_revenue_merchants' do
         expect(User.top_3_revenue_merchants[0]).to eq(@merchant_2)
@@ -88,43 +115,6 @@ RSpec.describe User, type: :model do
         expect(User.bottom_3_fulfilling_merchants[2]).to eq(@merchant_1)
         aft = User.bottom_3_fulfilling_merchants[2].avg_fulfillment_time
         expect(aft[0..7]).to eq('1 day 00')
-      end
-
-      # Merchants who sold the most items in a month:
-      #-order_item was fulfilled in that month, and the order status is completed.
-
-      #“Items”: -units sold, a sum of quantities within the merchant’s order_items.
-
-      #“Month” -calendar month
-
-      # Merchants who fulfilled non-cancelled orders:
-      #-merchants fulfilled their items AND the order status is not ‘cancelled’
-      #but pending/completed orders are fine
-
-      #filter out merchants who have un-fulfilled items in any order
-
-      it 'top 10 merchants who sold most items THIS month' do
-        expect(User.top_merchants_sold_most_items_this_month(3)[0]).to eq(@merchant_3)
-        expect(User.top_merchants_sold_most_items_this_month(3)[1]).to eq(@merchant_2)
-        expect(User.top_merchants_sold_most_items_this_month(3)[2]).to eq(@merchant_1)
-      end
-
-      it 'top 10 merchants who sold most items LAST month' do
-        expect(User.top_merchants_sold_most_items_last_month(3)[0]).to eq(@merchant_2)
-        expect(User.top_merchants_sold_most_items_last_month(3)[1]).to eq(@merchant_3)
-        expect(User.top_merchants_sold_most_items_last_month(3)[2]).to eq(@merchant_1)
-      end
-
-      xit 'top 10 merchants who fulfilled non-cancelled orders THIS month' do
-      end
-
-      xit 'top 10 merchants who fulfilled non-cancelled orders LAST month' do
-      end
-
-      xit 'top 5 merchants who fulfilled fastest to my state' do
-      end
-
-      xit 'top 5 merchants who fulfilled fastest to my city' do
       end
     end
   end
