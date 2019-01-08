@@ -230,7 +230,7 @@ describe 'as a registered user' do
       end
     end
 
-    it 'can review item again, but in other orders' do
+    xit 'can review item again, but in other orders' do
       visit profile_order_path(@order_1)
 
       within "#oitem-#{@oi_1.id}" do
