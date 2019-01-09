@@ -51,6 +51,26 @@ class User < ApplicationRecord
       .limit(count)
   end
 
+  def top_fulfilling_merchants_in_my_state(current_user, count)
+    merchants_in_my_state = Item.in_state_merchants(current_user)
+    User.joins(items: :orders)
+      .select('users.*, avg(order_items.updated_at - order_items.created_at) as avg_fulfillment_time')
+      .where("order_items.fulfilled=? AND items.id IN (?)", true, merchants_in_my_state)
+      .order('avg_fulfillment_time asc')
+      .group(:id)
+      .limit(count)
+  end
+
+  def top_fulfilling_merchants_in_my_city(current_user, count)
+    merchants_in_my_city = Item.in_city_merchants(current_user)
+    User.joins(items: :orders)
+      .select('users.*, avg(order_items.updated_at - order_items.created_at) as avg_fulfillment_time')
+      .where("order_items.fulfilled=? AND items.id IN (?)", true, merchants_in_my_city)
+      .order('avg_fulfillment_time asc')
+      .group(:id)
+      .limit(count)
+  end
+
   def self.top_3_revenue_merchants
     User.joins(items: :order_items)
       .select('users.*, sum(order_items.quantity * order_items.price) as revenue')
