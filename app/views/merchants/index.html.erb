@@ -101,4 +101,72 @@
     <% end unless @top_3_quantity_orders.nil? %>
     </ol>
   <% end %>
+
+  <%= tag.div id: "top-10-merchant-this-month" do %>
+    <h4>Top 10 Merchants with Most Item Quantity this Month</h4>
+    <ol>
+    <% @top_10_merchants_this_month.each do |merchant| %>
+    <%= tag.li class: 'merchant' do %>
+    Merchant Name: <%= merchant.name %>
+    <% end %>
+    <% end unless @top_10_merchants_this_month.nil? %>
+    </ol>
+  <% end %>
+
+  <%= tag.div id: "top-10-merchant-last-month" do %>
+    <h4>Top 10 Merchants with Most Item Quantity last Month</h4>
+    <ol>
+    <% @top_10_merchants_last_month.each do |merchant| %>
+    <%= tag.li class: 'merchant' do %>
+    Merchant Name: <%= merchant.name %>
+    <% end %>
+    <% end unless @top_10_merchants_last_month.nil? %>
+    </ol>
+  <% end %>
+
+  <%= tag.div id: "top-10-merchant-non_cancelled_this-month" do %>
+    <h4>Top 10 Merchants with Most fulfilled non-cancelled orders this Month</h4>
+    <ol>
+    <% @top_10_merchants_non_cancelled_this_month.each do |merchant| %>
+    <%= tag.li class: 'merchant' do %>
+    Merchant Name: <%= merchant.name %>
+    <% end %>
+    <% end unless @top_10_merchants_non_cancelled_this_month.nil? %>
+    </ol>
+  <% end %>
+
+  <%= tag.div id: "top-10-merchant-non_cancelled_last-month" do %>
+    <h4>Top 10 Merchants with Most fulfilled non-cancelled orders last Month</h4>
+    <ol>
+    <% @top_10_merchants_non_cancelled_last_month.each do |merchant| %>
+    <%= tag.li class: 'merchant' do %>
+    Merchant Name: <%= merchant.name %>
+    <% end %>
+    <% end unless @top_10_merchants_non_cancelled_last_month.nil? %>
+    </ol>
+  <% end %>
+
+  <% if current_user %>
+    <%= tag.div id: "top-5_fastest-merchants-in_state" do %>
+      <h4>Top 5 fastest fulfilling merchants in my state</h4>
+      <ol>
+      <% @top_5_fastest_merchants_in_state.each do |merchant| %>
+      <%= tag.li class: 'merchant' do %>
+      Merchant Name: <%= merchant.name %>
+      <% end %>
+      <% end unless @top_5_fastest_merchants_in_state.nil? %>
+      </ol>
+    <% end %>
+
+    <%= tag.div id: "top-5_fastest-merchants-in_city" do %>
+      <h4>Top 5 fastest fulfilling merchants in my city</h4>
+      <ol>
+      <% @top_5_fastest_merchants_in_city.each do |merchant| %>
+      <%= tag.li class: 'merchant' do %>
+      Merchant Name: <%= merchant.name %>
+      <% end %>
+      <% end unless @top_5_fastest_merchants_in_city.nil? %>
+      </ol>
+    <% end %>
+  <% end %>
 <% end %>
