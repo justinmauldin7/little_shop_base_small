@@ -14,6 +14,22 @@ class Item < ApplicationRecord
     greater_than_or_equal_to: 0
   }
 
+  def self.in_state_merchants(current_user)
+    self.all.map do |item|
+      if item.user.state == current_user.state
+        item.id
+      end
+    end.compact
+  end
+
+  def self.in_city_merchants(current_user)
+    self.all.map do |item|
+      if item.user.city == current_user.city
+        item.id
+      end
+    end.compact
+  end
+
   def self.item_popularity(count, order)
     Item.joins(:order_items)
       .select("items.*, sum(order_items.quantity) as total_ordered")
