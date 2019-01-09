@@ -14,6 +14,17 @@ class MerchantsController < ApplicationController
     @top_3_states = Order.top_3_states
     @top_3_cities = Order.top_3_cities
     @top_3_quantity_orders = Order.top_3_quantity_orders
+
+    @top_10_merchants_this_month = User.top_merchants_sold_most_items_this_month(10)
+    @top_10_merchants_last_month = User.top_merchants_sold_most_items_last_month(10)
+    @top_10_merchants_non_cancelled_this_month = User.top_merchants_with_non_cancelled_orders_this_month(10)
+    @top_10_merchants_non_cancelled_last_month = User.top_merchants_with_non_cancelled_orders_last_month(10)
+
+    if current_user
+      user = current_user
+      @top_5_fastest_merchants_in_state = user.top_fulfilling_merchants_in_my_state(user, 5)
+      @top_5_fastest_merchants_in_city = user.top_fulfilling_merchants_in_my_city(user, 5)
+    end 
   end
 
   def show
