@@ -51,6 +51,7 @@ NYC, Seattle WA, Seattle FL
 - top 3 biggest orders by quantity of items
 2, 3, 4
 =end
+
       it 'shows top 3 merchants by revenue' do
         visit merchants_path
         within '#statistics' do
@@ -143,6 +144,116 @@ NYC, Seattle WA, Seattle FL
 
       expect(current_path).to eq(admin_merchant_path(@merchant))
       expect(page).to have_content("Merchant Dashboard for #{@merchant.name}")
+    end
+  end
+
+  describe 'it shows MORE STATS' do
+    before :each do
+      @user_1 = create(:user, city: 'Denver', state: 'CO')
+      @user_2 = create(:user, city: 'NYC', state: 'NY')
+      @user_3 = create(:user, city: 'Seattle', state: 'WA')
+      @user_4 = create(:user, city: 'Seattle', state: 'FL')
+
+      @merchant_7 = create(:merchant,  city: 'Denver', state: 'CO', name: 'Merchant Name 7')
+      @merchant_8 = create(:merchant, city: 'Denver', state: 'CO', name: 'Merchant Name 8')
+      @merchant_9 = create(:merchant, name: 'Merchant Name 9')
+      @item_1 = create(:item, user: @merchant_7)
+      @item_2 = create(:item, user: @merchant_8)
+      @item_3 = create(:item, user: @merchant_9)
+
+      @order_1 = create(:completed_order, user: @user_1)
+      @oi_1 = create(:fulfilled_order_item, item: @item_1, order: @order_1, quantity: 100, price: 100, created_at: 10.minutes.ago, updated_at: 9.minutes.ago)
+
+      @order_2 = create(:cancelled_order, user: @user_1)
+      @oi_2 = create(:fulfilled_order_item, item: @item_2, order: @order_2, quantity: 300, price: 300, created_at: 2.days.ago, updated_at: 1.minutes.ago)
+
+      @order_3 = create(:completed_order, user: @user_1)
+      @oi_3 = create(:fulfilled_order_item, item: @item_3, order: @order_3, quantity: 200, price: 200, created_at: 10.minutes.ago, updated_at: 5.minutes.ago)
+
+      @order_4 = create(:completed_order, user: @user_1)
+      @oi_4 = create(:fulfilled_order_item, item: @item_3, order: @order_4, quantity: 201, price: 200, created_at: 10.minutes.ago, updated_at: 5.minutes.ago)
+
+      @order_5 = create(:cancelled_order, user: @user_1)
+      @oi_5 = create(:fulfilled_order_item, item: @item_1, order: @order_5, quantity: 100, price: 100, created_at: 34.days.ago, updated_at: 32.days.ago)
+
+      @order_6 = create(:completed_order, user: @user_1)
+      @oi_6 = create(:fulfilled_order_item, item: @item_2, order: @order_6, quantity: 600, price: 300, created_at: 34.days.ago, updated_at: 32.days.ago)
+
+      @order_7 = create(:completed_order, user: @user_1)
+      @oi_7 = create(:fulfilled_order_item, item: @item_3, order: @order_7, quantity: 200, price: 200, created_at: 34.days.ago, updated_at: 32.days.ago)
+
+      @order_8 = create(:completed_order, user: @user_1)
+      @oi_8 = create(:fulfilled_order_item, item: @item_3, order: @order_8, quantity: 201, price: 200, created_at: 34.days.ago, updated_at: 32.days.ago)
+    end
+
+    it 'shows top 10 merchants who sold most items THIS month' do
+      visit merchants_path
+      within '#statistics' do
+        within '#top-10-merchant-this-month' do
+          expect(page.all('.merchant')[0]).to have_content("Merchant Name: #{@merchant_9.name}")
+          expect(page.all('.merchant')[1]).to have_content("Merchant Name: #{@merchant_8.name}")
+          expect(page.all('.merchant')[2]).to have_content("Merchant Name: #{@merchant_7.name}")
+        end
+      end
+    end
+
+    it 'shows top 10 merchants who sold most items LAST month' do
+      visit merchants_path
+      within '#statistics' do
+        within '#top-10-merchant-last-month' do
+          expect(page.all('.merchant')[0]).to have_content("Merchant Name: #{@merchant_8.name}")
+          expect(page.all('.merchant')[1]).to have_content("Merchant Name: #{@merchant_9.name}")
+          expect(page.all('.merchant')[2]).to have_content("Merchant Name: #{@merchant_7.name}")
+        end
+      end
+    end
+
+    it 'top 10 merchants who fulfilled non-cancelled orders THIS month' do
+      visit merchants_path
+      within '#statistics' do
+        within '#top-10-merchant-this-month' do
+          expect(page.all('.merchant')[0]).to have_content("Merchant Name: #{@merchant_9.name}")
+          expect(page.all('.merchant')[1]).to have_content("Merchant Name: #{@merchant_8.name}")
+        end
+      end
+    end
+
+    it 'top 10 merchants who fulfilled non-cancelled orders LAST month' do
+      visit merchants_path
+      within '#statistics' do
+        within '#top-10-merchant-last-month' do
+          expect(page.all('.merchant')[0]).to have_content("Merchant Name: #{@merchant_8.name}")
+          expect(page.all('.merchant')[1]).to have_content("Merchant Name: #{@merchant_9.name}")
+        end
+      end
+    end
+
+    it 'top 5 merchants who fulfilled fastest to my state' do
+      login_user = create(:user, city: 'Denver', state: 'CO')
+
+      allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(login_user)
+
+      visit merchants_path
+      within '#statistics' do
+        within '#top-5_fastest-merchants-in_state' do
+          expect(page.all('.merchant')[0]).to have_content("Merchant Name: #{@merchant_7.name}")
+          expect(page.all('.merchant')[1]).to have_content("Merchant Name: #{@merchant_8.name}")
+        end
+      end
+    end
+
+    it 'top 5 merchants who fulfilled fastest to my city' do
+      login_user = create(:user, city: 'Denver', state: 'CO')
+
+      allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(login_user)
+      
+      visit merchants_path
+      within '#statistics' do
+        within '#top-5_fastest-merchants-in_city' do
+          expect(page.all('.merchant')[0]).to have_content("Merchant Name: #{@merchant_7.name}")
+          expect(page.all('.merchant')[1]).to have_content("Merchant Name: #{@merchant_8.name}")
+        end
+      end
     end
   end
 end
