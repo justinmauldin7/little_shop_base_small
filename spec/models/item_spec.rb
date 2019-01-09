@@ -68,4 +68,59 @@ RSpec.describe Item, type: :model do
       expect(item_2.ever_ordered?).to eq(false)
     end
   end
+
+  describe 'helper methods for merchant stats' do
+    before :each do
+      @login_user = create(:user, city: 'Denver', state: 'CO')
+
+      @user_1 = create(:user, city: 'Denver', state: 'CO')
+      @user_2 = create(:user, city: 'NYC', state: 'NY')
+      @user_3 = create(:user, city: 'Seattle', state: 'WA')
+      @user_4 = create(:user, city: 'Seattle', state: 'FL')
+
+      @merchant_1 = create(:merchant,  city: 'Denver', state: 'CO')
+      @merchant_2 = create(:merchant, city: 'Denver', state: 'CO')
+      @merchant_3 = create(:merchant)
+      @item_1 = create(:item, user: @merchant_1)
+      @item_2 = create(:item, user: @merchant_2)
+      @item_3 = create(:item, user: @merchant_3)
+
+      @order_1 = create(:completed_order, user: @user_1)
+      @oi_1 = create(:fulfilled_order_item, item: @item_1, order: @order_1, quantity: 100, price: 100, created_at: 10.minutes.ago, updated_at: 9.minutes.ago)
+
+      @order_2 = create(:cancelled_order, user: @user_1)
+      @oi_2 = create(:fulfilled_order_item, item: @item_2, order: @order_2, quantity: 300, price: 300, created_at: 2.days.ago, updated_at: 1.minutes.ago)
+
+      @order_3 = create(:completed_order, user: @user_1)
+      @oi_3 = create(:fulfilled_order_item, item: @item_3, order: @order_3, quantity: 200, price: 200, created_at: 10.minutes.ago, updated_at: 5.minutes.ago)
+
+      @order_4 = create(:completed_order, user: @user_1)
+      @oi_4 = create(:fulfilled_order_item, item: @item_3, order: @order_4, quantity: 201, price: 200, created_at: 10.minutes.ago, updated_at: 5.minutes.ago)
+
+      @order_5 = create(:cancelled_order, user: @user_1)
+      @oi_5 = create(:fulfilled_order_item, item: @item_1, order: @order_5, quantity: 100, price: 100, created_at: 34.days.ago, updated_at: 32.days.ago)
+
+      @order_6 = create(:completed_order, user: @user_1)
+      @oi_6 = create(:fulfilled_order_item, item: @item_2, order: @order_6, quantity: 600, price: 300, created_at: 34.days.ago, updated_at: 32.days.ago)
+
+      @order_7 = create(:completed_order, user: @user_1)
+      @oi_7 = create(:fulfilled_order_item, item: @item_3, order: @order_7, quantity: 200, price: 200, created_at: 34.days.ago, updated_at: 32.days.ago)
+
+      @order_8 = create(:completed_order, user: @user_1)
+      @oi_8 = create(:fulfilled_order_item, item: @item_3, order: @order_8, quantity: 201, price: 200, created_at: 34.days.ago, updated_at: 32.days.ago)
+
+      allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(@login_user)
+    end
+    it '.in_state_merchants' do
+      expect(Item.in_state_merchants(@login_user).count).to eq(2)
+      expect(Item.in_state_merchants(@login_user)[0]).to eq(@item_1.id)
+      expect(Item.in_state_merchants(@login_user)[1]).to eq(@item_2.id)
+    end
+
+    it '.in_city_merchants' do
+      expect(Item.in_city_merchants(@login_user).count).to eq(2)
+      expect(Item.in_city_merchants(@login_user)[0]).to eq(@item_1.id)
+      expect(Item.in_city_merchants(@login_user)[1]).to eq(@item_2.id)
+    end
+  end
 end
